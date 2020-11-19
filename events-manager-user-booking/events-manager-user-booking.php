@@ -19,7 +19,7 @@
  * Cannot override method because the events manager em-bookings.php is not in a class
  * cannot remove action because no function besides the pdf report in em-bookings has an action.
  *
- * Only way for custom interface seems to be to replace the file since we cannot override or remove
+ * Only to customize interface seems to replace the file since we cannot override or remove
  *
  */
 

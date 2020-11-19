@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Events Manager User Booking
- * Plugin URI:        https://example.com/plugins/the-basics/
+ * Plugin URI:        https://github.com/wheelhousedev/events-manager-user-booking
  * Description:       An addon to events manager.
  * Version:           0.0.1
  * Requires at least: 5.2
@@ -15,42 +15,44 @@
  */
 
 
-global $EMUB;
-$EMUB = new Events_Manager_User_Booking;
+/**
+ * Cannot override method because the events manager em-bookings.php is not in a class
+ * cannot remove action because no function besides the pdf report in em-bookings has an action.
+ *
+ * Only way for custom interface seems to be to replace the file since we cannot override or remove
+ *
+ */
 
-class Events_Manager_User_Booking {
-
-    private $textdomain = "EMUB";
-    private $required_plugins = array('events-manager','events-manager-pro');
-    function have_required_plugins() {
-        if (empty($this->required_plugins))
-            return true;
-        $active_plugins = (array) get_option('active_plugins', array());
-        if (is_multisite()) {
-            $active_plugins = array_merge($active_plugins, get_site_option('active_sitewide_plugins', array()));
-        }
-        foreach ($this->required_plugins as $key => $required) {
-            $required = (!is_numeric($key)) ? "{$key}/{$required}.php" : "{$required}/{$required}.php";
-            if (!in_array($required, $active_plugins) && !array_key_exists($required, $active_plugins))
-                return false;
-        }
-        return true;
-    }
-
-    function __construct() {
-        if (!$this->have_required_plugins())
-            return;
-		load_plugin_textdomain($this->textdomain, false, dirname(plugin_basename(__FILE__)) . '/languages');
-		$file_pointer = WP_PLUGIN_DIR ."/admin/em-bookings.php";
-		if (!unlink($file_pointer)) {
-			echo ("$file_pointer cannot be deleted due to an error");
-		}
-		else {
-			echo ("$file_pointer has been deleted");
-		}
-	}
+function pluginprefix_setup_file_copy() {
+	$file_orig = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings-orig.txt";
+	$file_pointer = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings.php";
+	copy($file_pointer, $file_orig);
 }
-//Admin Files
-if( is_admin() ){
-	include('admin/em-bookings.php');
+function pluginprefix_setup_file_change() {
+	$file_getter = WP_PLUGIN_DIR ."/events-manager-user-booking/admin/em-bookings.php";
+	$file_pointer = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings.php";
+	copy($file_getter, $file_pointer);
 }
+
+/**
+ * Activatation hook.
+ */
+function pluginprefix_activate() {
+    pluginprefix_setup_file_copy();
+	pluginprefix_setup_file_change();
+    flush_rewrite_rules();
+}
+register_activation_hook( __FILE__, 'pluginprefix_activate' );
+
+
+/**
+ * Deactivation hook.
+ */
+function pluginprefix_deactivate() {
+	$file_orig = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings-orig.txt";
+	$file_pointer = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings.php";
+	copy($file_orig, $file_pointer);
+	unlink($file_orig);
+    flush_rewrite_rules();
+}
+register_deactivation_hook( __FILE__, 'pluginprefix_deactivate' );

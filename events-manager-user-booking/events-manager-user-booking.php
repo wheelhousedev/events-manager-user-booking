@@ -11,6 +11,7 @@
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       event-manager
+ * Domain Path:       /languages
  */
 
 
@@ -18,15 +19,10 @@
  * Cannot override method because the events manager em-bookings.php is not in a class
  * cannot remove action because no function besides the pdf report in em-bookings has an action.
  *
- * Only to customize interface seems to replace the file since we cannot override or remove
+ * Only way for custom interface seems to be to replace the file since we cannot override or remove
  *
  */
 
-function pluginprefix_setup_file_copy() {
-	$file_orig = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings-orig.txt";
-	$file_pointer = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings.php";
-	copy($file_pointer, $file_orig);
-}
 function pluginprefix_setup_file_change() {
 	$file_getter = WP_PLUGIN_DIR ."/events-manager-user-booking/admin/em-bookings.php";
 	$file_pointer = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings.php";
@@ -37,7 +33,6 @@ function pluginprefix_setup_file_change() {
  * Activatation hook.
  */
 function pluginprefix_activate() {
-    pluginprefix_setup_file_copy();
 	pluginprefix_setup_file_change();
     flush_rewrite_rules();
 }
@@ -48,7 +43,7 @@ register_activation_hook( __FILE__, 'pluginprefix_activate' );
  * Deactivation hook.
  */
 function pluginprefix_deactivate() {
-	$file_orig = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings-orig.txt";
+	$file_orig = WP_PLUGIN_DIR ."/events-manager-user-booking/admin/em-bookings-orig.txt";
 	$file_pointer = WP_PLUGIN_DIR ."/events-manager/admin/em-bookings.php";
 	copy($file_orig, $file_pointer);
 	unlink($file_orig);
